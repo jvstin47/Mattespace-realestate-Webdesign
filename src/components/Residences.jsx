@@ -72,7 +72,7 @@ const Residences = () => {
               </div>
 
               <div className="mt-8">
-                <a href="#plans" className="inline-flex items-center text-accent hover:text-accent-hover text-label-md transition-colors group">
+                <a href="#contact" className="inline-flex items-center text-accent hover:text-accent-hover text-label-md transition-colors group">
                   Request Plans <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </a>
               </div>

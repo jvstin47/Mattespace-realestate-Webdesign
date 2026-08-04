@@ -212,7 +212,7 @@ export default function ScrollHero() {
     if (!state.isHeroLocked) return;
 
     e.preventDefault();
-    if (state.isPlaying) return;
+    if (state.isPlaying || state.isCoolingDown) return;
 
     const touchY = e.touches[0].clientY;
     const deltaY = touchStartY.current - touchY;
@@ -222,6 +222,30 @@ export default function ScrollHero() {
       touchStartY.current = touchY;
     }
   }, [handleScroll]);
+
+  // ── Reset to Chapter 1 Frame 1 (triggered by Navbar logo click) ──
+  const resetToFirstFrame = useCallback(() => {
+    const state = stateRef.current;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+
+    state.currentChapter = 0;
+    state.currentFrame = 1;
+    state.isPlaying = false;
+    state.isCoolingDown = false;
+    state.direction = 1;
+    state.isHeroLocked = true;
+
+    if (lenisRef.current) lenisRef.current.stop();
+
+    drawFrame(1);
+
+    setUiState({
+      chapterIndex: 0,
+      showRail: true,
+      showFinalBrand: false,
+      showIndicator: true,
+    });
+  }, [drawFrame]);
 
   // ── Init ──
   useEffect(() => {

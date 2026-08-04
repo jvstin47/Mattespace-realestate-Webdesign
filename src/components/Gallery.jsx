@@ -110,7 +110,10 @@ const Gallery = () => {
       {/* Lightbox */}
       {selectedIndex !== null && (
         <div 
-          className="fixed inset-0 z-50 bg-slate-900/95 backdrop-blur-2xl flex flex-col justify-center items-center"
+          className="fixed inset-0 z-[60] bg-slate-900/95 backdrop-blur-2xl flex flex-col justify-center items-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image lightbox"
           onClick={closeLightbox}
         >
           <button 

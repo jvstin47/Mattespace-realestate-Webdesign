@@ -22,7 +22,7 @@ export default function Preloader({ progress, isReady, onEnter }) {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-ceramic transition-opacity duration-700 ease-out-expo ${
+      className={`fixed inset-0 z-[70] flex flex-col items-center justify-center bg-ceramic transition-opacity duration-700 ease-out-expo ${
         isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >

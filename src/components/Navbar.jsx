@@ -14,6 +14,16 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
+
   const handleMouseMove = (e) => {
     const btn = buttonRef.current;
     if (!btn) return;
@@ -97,7 +107,7 @@ const Navbar = () => {
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[60] bg-ceramic flex flex-col items-center justify-center">
+        <div className="fixed inset-0 z-[80] bg-ceramic flex flex-col items-center justify-center">
           <button 
             onClick={() => setMobileMenuOpen(false)} 
             className="absolute top-10 right-8 text-slate-800"
