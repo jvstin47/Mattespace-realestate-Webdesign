@@ -11,11 +11,17 @@ const MANDATORY_STOP_DURATION = 1000; // Mandatory 1-second hold on every chapte
 
 const RAIL_POSITIONS = {
   'bottom-left': { bottom: 70, left: 64, top: 'auto', right: 'auto', transform: 'translate(0, 0)' },
-  'lower-right': { bottom: 70, right: 64, top: 'auto', left: 'auto', transform: 'translate(0, 0)' },
-  'left-center': { top: '40%', left: 64, bottom: 'auto', right: 'auto', transform: 'translate(0, -50%)' },
-  'upper-right': { top: 130, right: 64, bottom: 'auto', left: 'auto', transform: 'translate(0, 0)' },
   'lower-left': { bottom: 120, left: 64, top: 'auto', right: 'auto', transform: 'translate(0, 0)' },
+  'left-center': { top: '42%', left: 64, bottom: 'auto', right: 'auto', transform: 'translate(0, -50%)' },
+  'top-left': { top: 120, left: 64, bottom: 'auto', right: 'auto', transform: 'translate(0, 0)' },
+  'top-center': { top: 120, left: '50%', bottom: 'auto', right: 'auto', transform: 'translate(-50%, 0)' },
+  'top-right': { top: 120, right: 64, bottom: 'auto', left: 'auto', transform: 'translate(0, 0)' },
+  'upper-right': { top: 140, right: 64, bottom: 'auto', left: 'auto', transform: 'translate(0, 0)' },
+  'center-right': { top: '42%', right: 64, bottom: 'auto', left: 'auto', transform: 'translate(0, -50%)' },
+  'lower-right': { bottom: 70, right: 64, top: 'auto', left: 'auto', transform: 'translate(0, 0)' },
+  'bottom-right': { bottom: 70, right: 64, top: 'auto', left: 'auto', transform: 'translate(0, 0)' },
   'center-bottom': { bottom: 70, left: '50%', top: 'auto', right: 'auto', transform: 'translate(-50%, 0)' },
+  'center': { top: '45%', left: '50%', bottom: 'auto', right: 'auto', transform: 'translate(-50%, -50%)' },
 };
 
 export default function ScrollHero() {
