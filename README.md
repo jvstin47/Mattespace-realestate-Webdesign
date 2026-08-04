@@ -64,3 +64,7 @@ The project utilizes a custom progressive preloader script (`framePreloader.js`)
 ---
 
 *Designed and developed as an exploration into luxury digital architecture and high-performance scroll storytelling.*
+
+## 📄 License
+
+This project is open-source and available under the [MIT License](LICENSE).
