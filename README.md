@@ -4,24 +4,31 @@
 
 ![Mattespace Preview](/frames/21_final_hero_shot_twin_towers/frame_1500.jpg)
 
+## 🎬 Creative Philosophy
+
+> **"The visitor controls when the story advances. Mattespace controls how the story is experienced."**
+
+The hero section is **not a website banner** and **not a scroll-controlled video scrubber**. It is an **interactive architectural short film**. A scroll gesture acts purely as a *"continue"* trigger to advance to the next directed scene at native 60fps pacing, rewarding patience with beautifully directed cinematography.
+
 ## 📌 Overview
 
-Mattespace is an open-source portfolio piece demonstrating a premium, high-end web experience for luxury real estate. Inspired by Apple's product pages and top-tier architectural firms, the site abandons traditional static images in favor of a **1,500+ frame cinematic sequence** controlled entirely by the user's scroll.
+Mattespace is an open-source portfolio piece demonstrating a flagship web experience for luxury real estate. Inspired by Apple launch pages, Aman Resorts, and Foster + Partners, the site uses a **1,500+ frame canvas sequence** structured into 14 distinct cinematic chapters.
 
-The project blends modern frontend performance techniques with a restrained, editorial design system focused on typography, glassmorphism, and physical materials (frosted glass, matte ceramic).
+The project combines a native 60fps playback engine with a restrained, editorial design system focused on Playfair Display serif typography, glassmorphism, and physical material textures (frosted glass, matte ceramic, ash wood).
 
 ## ✨ Key Features
 
-### 🎬 Cinematic GSAP Scroll Engine
-- **1,572 High-Resolution Frames**: A 600vh+ scrubbable `<canvas>` sequence divided into 21 distinct architectural shots.
-- **Weighted Timeline Engine**: Scroll position is never mapped directly to frames. Each shot has an independent "scroll weight", "easing", and "resistance", making certain cinematic moments feel heavy and suspended, while lifestyle montages fly by rapidly.
-- **Lenis Smooth Scroll**: Configured with a heavy "camera dolly" feel (`wheelMultiplier: 0.35`, `lerp: 0.06`) so the experience cannot be accidentally rushed or skipped.
+### 🎬 14-Chapter Interactive Short Film Engine
+- **1,572 High-Resolution Frames**: Divided into 21 physical shot folders rendered on an HTML5 `<canvas>` with DPR scaling.
+- **Triggered 60fps Scene Playback**: Scrolling does not scrub frames—it triggers native 60fps playback for the next chapter. Frantic scroll input is buffered/ignored until the chapter completes.
+- **Pacing & Speed Multipliers**: Each chapter has customized pacing, including a fast `1.85x` drive multiplier for the luxury car sequence.
+- **Lenis Scroll Lock**: Locks page scroll until Chapter 14 (*Final Crown & Brand Reveal*) finishes, seamlessly releasing into the rest of the website.
 
-### 💎 Editorial Design System
-- **Floating Caption Rail**: A Vision Pro-inspired translucent architectural annotation strip that intelligently repositions and changes theme (dark/light) based on the underlying video brightness.
-- **Ceramic Palette & Glassmorphism**: Utilizes a muted `#F5F7F8` ceramic base, accented by varying degrees of backdrop blurs and subtle 1px borders.
-- **Typography**: Pairs the elegant `Playfair Display` (serif) with the modern `Geist` (sans-serif) for an editorial hierarchy.
-- **Micro-Interactions**: Features a custom magnetic lerp cursor, IntersectionObserver clip-path reveals, and GSAP magnetic buttons.
+### 💎 Editorial Design System & Typography
+- **Playfair Display Luxury Headlines**: Elegant serif display typography (`Playfair Display` italic) for headlines, elevating the tone to an architectural exhibition.
+- **Dynamic Floating Chapter Cards**: Vision Pro-inspired frosted capsules (`backdrop-blur-3xl`) with dynamic progress indicators (`CHAPTER 02 / 14`), pulsing accent bars, and smooth spring reveals (`scale + blur`).
+- **Ceramic Palette & Uniform Rounding**: Standardized `rounded-3xl` (24px) corner radius across all section cards.
+- **Adaptive Morphing Navbar**: Dark frosted pill over the hero video, morphing into a ceramic glass pill over light body sections.
 
 ## 🛠 Tech Stack
 
