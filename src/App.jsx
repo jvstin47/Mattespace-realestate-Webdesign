@@ -40,7 +40,7 @@ function App() {
       )}
       
       <div 
-        className={`transition-opacity duration-1000 ${hasEntered ? 'opacity-100' : 'opacity-0'}`}
+        className={`w-full overflow-x-hidden transition-opacity duration-1000 ${hasEntered ? 'opacity-100' : 'opacity-0'}`}
       >
         <Navbar />
         <main>
