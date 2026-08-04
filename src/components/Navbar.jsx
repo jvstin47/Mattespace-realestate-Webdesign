@@ -31,6 +31,7 @@ const Navbar = () => {
 
   const handleLogoClick = (e) => {
     e.preventDefault();
+    window.dispatchEvent(new CustomEvent('mattespace:reset-hero'));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

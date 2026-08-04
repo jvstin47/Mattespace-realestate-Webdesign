@@ -252,6 +252,7 @@ export default function ScrollHero() {
     window.addEventListener('wheel', handleScroll, { passive: false });
     window.addEventListener('touchstart', handleTouchStart, { passive: false });
     window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('mattespace:reset-hero', resetToFirstFrame);
 
     drawFrame(1);
 
@@ -260,11 +261,12 @@ export default function ScrollHero() {
       window.removeEventListener('wheel', handleScroll);
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('mattespace:reset-hero', resetToFirstFrame);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       lenis.destroy();
       lenisRef.current = null;
     };
-  }, [isMobile, drawFrame, handleScroll, handleTouchStart, handleTouchMove]);
+  }, [isMobile, drawFrame, handleScroll, handleTouchStart, handleTouchMove, resetToFirstFrame]);
 
   // ── UI Derived State ──
   const currentChapterData = CHAPTERS[uiState.chapterIndex];
