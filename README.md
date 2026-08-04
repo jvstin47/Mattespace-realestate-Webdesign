@@ -2,7 +2,14 @@
 
 > A flagship, agency-quality real estate experience built to showcase architectural storytelling through a high-performance cinematic scroll engine.
 
-![Mattespace Preview](/frames/21_final_hero_shot_twin_towers/frame_1500.jpg)
+[![Live Demo](https://img.shields.io/badge/LIVE%20DEMO-mattespace--realestate--webdesign.vercel.app-5D7897?style=for-the-badge&logo=vercel)](https://mattespace-realestate-webdesign.vercel.app)
+
+![Mattespace Preview](/public/frames/21_final_hero_shot_twin_towers/frame_1500.jpg)
+
+### 🌐 Experience It Live
+> **[Try the Interactive Short Film Live on Vercel ➔](https://mattespace-realestate-webdesign.vercel.app)**
+>
+> *Scroll down to trigger each of the 14 directed cinematic chapters. Experience how native 60fps pacing and frosted glass typography transform web navigation into an architectural film.*
 
 ## 🎬 Creative Philosophy
 
