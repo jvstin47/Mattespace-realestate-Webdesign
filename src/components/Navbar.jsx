@@ -29,6 +29,13 @@ const Navbar = () => {
     btn.style.transform = 'translate(0px, 0px)';
   };
 
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const whatsappUrl = "https://wa.me/1234567890?text=Hello%2C%20I%20am%20interested%20in%20Mattespace%20Residences.";
+
   return (
     <>
       <nav 
@@ -38,9 +45,13 @@ const Navbar = () => {
             : 'bg-slate-900/75 backdrop-blur-2xl border border-white/15 shadow-2xl py-3.5 text-white'
         }`}
       >
-        <div className={`font-display text-headline-sm font-medium tracking-tight transition-colors duration-500 ${scrolled ? 'text-slate-800' : 'text-white'}`}>
+        <a 
+          href="#"
+          onClick={handleLogoClick}
+          className={`font-display text-headline-sm font-medium tracking-tight cursor-pointer transition-colors duration-500 ${scrolled ? 'text-slate-800' : 'text-white'}`}
+        >
           Mattespace
-        </div>
+        </a>
         
         <div className="hidden md:flex gap-8 items-center">
           {['Residences', 'Amenities', 'Gallery', 'Contact'].map((item) => (
@@ -58,11 +69,14 @@ const Navbar = () => {
         </div>
         
         <div className="hidden md:block">
-          <button 
+          <a 
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             ref={buttonRef}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className={`text-label-md px-6 py-2.5 rounded-full transition-colors duration-300 ${
+            className={`inline-block text-label-md px-6 py-2.5 rounded-full transition-colors duration-300 ${
               scrolled 
                 ? 'bg-slate-800 text-white hover:bg-slate-700' 
                 : 'bg-white text-slate-900 hover:bg-slate-100 shadow-md'
@@ -70,7 +84,7 @@ const Navbar = () => {
             style={{ transition: 'transform 0.1s ease-out, background-color 0.3s, color 0.3s' }}
           >
             Inquire
-          </button>
+          </a>
         </div>
         
         <div className="md:hidden">
@@ -89,7 +103,7 @@ const Navbar = () => {
           >
             <X className="w-8 h-8" />
           </button>
-          <div className="flex flex-col gap-8 text-center">
+          <div className="flex flex-col gap-8 text-center items-center">
             {['Residences', 'Amenities', 'Gallery', 'Contact'].map((item) => (
               <a 
                 key={item} 
@@ -100,6 +114,15 @@ const Navbar = () => {
                 {item}
               </a>
             ))}
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="mt-4 bg-slate-800 text-white text-label-md px-8 py-3 rounded-full hover:bg-slate-700 transition-colors"
+            >
+              Inquire on WhatsApp
+            </a>
           </div>
         </div>
       )}
