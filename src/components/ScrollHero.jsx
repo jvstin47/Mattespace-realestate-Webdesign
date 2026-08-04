@@ -90,16 +90,28 @@ export default function ScrollHero() {
 
     let startTime = performance.now();
     const targetFrame = direction === 1 ? targetChapter.endFrame : targetChapter.startFrame;
+    const initialFrame = direction === 1 ? targetChapter.startFrame : targetChapter.endFrame;
+    const totalSpan = Math.abs(targetChapter.endFrame - targetChapter.startFrame);
     const speed = targetChapter.speedMultiplier || 1;
+    let textRevealed = false;
 
     const loop = (time) => {
       const elapsed = time - startTime;
-      // Multiply advancement rate by speedMultiplier (e.g. 1.85x for fast car drive)
       const rawAdvance = Math.floor((elapsed / FRAME_DURATION) * speed);
 
       if (rawAdvance > 0) {
         state.currentFrame += Math.max(1, rawAdvance) * direction;
-        startTime = time; // reset timer
+        startTime = time;
+      }
+
+      // Check if animation is halfway through (>= 40% progress) to reveal text card dynamically while motion is active
+      const currentProgress = totalSpan > 0 ? Math.abs(state.currentFrame - initialFrame) / totalSpan : 1;
+      if (!textRevealed && currentProgress >= 0.4) {
+        textRevealed = true;
+        setUiState(prev => ({
+          ...prev,
+          showRail: chapterIndex !== CHAPTERS.length - 1,
+        }));
       }
 
       // Clamp frame boundary
@@ -121,7 +133,7 @@ export default function ScrollHero() {
           
           setUiState(prev => ({
             ...prev,
-            showRail: chapterIndex !== CHAPTERS.length - 1, // Hide rail on final chapter
+            showRail: chapterIndex !== CHAPTERS.length - 1,
             showFinalBrand: chapterIndex === CHAPTERS.length - 1,
             showIndicator: chapterIndex === 0,
           }));
