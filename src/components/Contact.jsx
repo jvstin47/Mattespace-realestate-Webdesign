@@ -66,7 +66,7 @@ const Contact = () => {
       />
       
       {/* Content */}
-      <div className="relative z-10 glass-card max-w-2xl w-full mx-4 p-12 md:p-20 rounded-2xl text-center">
+      <div className="relative z-10 glass-card max-w-2xl w-full mx-4 p-12 md:p-20 rounded-3xl text-center">
         <h2 className="font-display text-display-md md:text-display-lg text-slate-800 text-reveal is-visible">
           Begin Your Next Chapter
         </h2>

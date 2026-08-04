@@ -260,11 +260,12 @@ export default function ScrollHero() {
   const caption = currentChapterData.caption;
 
   const onDark = caption.panelMode === 'onDark';
-  const panelBg = onDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
-  const panelBorder = onDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
-  const textPrimary = onDark ? 'rgba(255,255,255,0.92)' : 'rgba(28,39,51,0.92)';
-  const textLabel = onDark ? 'rgba(255,255,255,0.45)' : 'rgba(28,39,51,0.45)';
-  const textDesc = onDark ? 'rgba(255,255,255,0.55)' : 'rgba(28,39,51,0.55)';
+  const panelBg = onDark ? 'rgba(15, 23, 42, 0.78)' : 'rgba(245, 247, 248, 0.92)';
+  const panelBorder = onDark ? 'rgba(255, 255, 255, 0.18)' : 'rgba(90, 105, 120, 0.18)';
+  const panelShadow = onDark ? '0 20px 50px rgba(0, 0, 0, 0.45)' : '0 20px 50px rgba(28, 39, 51, 0.12)';
+  const textPrimary = onDark ? '#FFFFFF' : '#1C2733';
+  const textLabel = onDark ? 'rgba(255, 255, 255, 0.65)' : '#5D7897';
+  const textDesc = onDark ? 'rgba(255, 255, 255, 0.8)' : '#66717E';
   
   const pos = RAIL_POSITIONS[caption.position] || RAIL_POSITIONS['bottom-left'];
 
@@ -275,7 +276,7 @@ export default function ScrollHero() {
         <video autoPlay loop muted playsInline className="absolute inset-0 h-full w-full object-cover" src="/Timeline 1.mp4" />
         <div className="absolute inset-0 bg-black/25 pointer-events-none" />
         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-          <div className="glass-dark rounded-3xl p-8 max-w-sm w-full mx-auto flex flex-col items-center">
+          <div className="bg-slate-900/85 backdrop-blur-2xl border border-white/20 rounded-3xl p-8 max-w-sm w-full mx-auto flex flex-col items-center shadow-2xl">
             <h2 className="font-display text-headline-lg text-white mb-6">Architecture Designed Around Light</h2>
             <a href="#amenities" className="inline-block border border-white/30 rounded-full px-6 py-3 text-label-md text-white hover:bg-white hover:text-slate-900 transition-colors duration-300">
               Explore Amenities
@@ -291,8 +292,8 @@ export default function ScrollHero() {
     <section ref={containerRef} className="relative w-full h-screen bg-black overflow-hidden">
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
       
-      <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/15 to-transparent pointer-events-none z-0" />
-      <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black/25 to-transparent pointer-events-none z-0" />
+      <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/20 to-transparent pointer-events-none z-0" />
+      <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black/30 to-transparent pointer-events-none z-0" />
 
       {/* ── Caption Rail ── */}
       <div
@@ -305,24 +306,25 @@ export default function ScrollHero() {
         }}
       >
         <div
+          className="rounded-3xl shadow-2xl"
           style={{
-            padding: '20px 28px',
+            padding: '24px 30px',
             backdropFilter: 'blur(36px)',
             WebkitBackdropFilter: 'blur(36px)',
-            borderTop: `1px solid ${panelBorder}`,
-            borderBottom: `1px solid ${panelBorder}`,
+            border: `1px solid ${panelBorder}`,
             background: panelBg,
-            transition: 'background 0.8s ease, border-color 0.8s ease',
+            boxShadow: panelShadow,
+            transition: 'background 0.8s ease, border-color 0.8s ease, box-shadow 0.8s ease',
           }}
         >
-          <div className="font-body font-medium mb-3" style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: textLabel, transition: 'color 0.8s ease' }}>
+          <div className="font-body font-semibold mb-2" style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: textLabel, transition: 'color 0.8s ease' }}>
             {caption.label}
           </div>
-          <div className="font-body font-medium whitespace-pre-line" style={{ fontSize: 'clamp(24px, 2.2vw, 32px)', lineHeight: 1.15, color: textPrimary, transition: 'color 0.8s ease' }}>
+          <div className="font-body font-medium whitespace-pre-line" style={{ fontSize: 'clamp(24px, 2.2vw, 32px)', lineHeight: 1.18, color: textPrimary, transition: 'color 0.8s ease' }}>
             {caption.headline}
           </div>
           {caption.description && (
-            <div className="font-body mt-3" style={{ fontSize: 14, lineHeight: 1.5, color: textDesc, transition: 'color 0.8s ease' }}>
+            <div className="font-body mt-3 font-normal" style={{ fontSize: 14, lineHeight: 1.55, color: textDesc, transition: 'color 0.8s ease' }}>
               {caption.description}
             </div>
           )}

@@ -35,13 +35,13 @@ const Amenities = () => {
         </header>
 
         {/* 1. INFINITY POOL */}
-        <div className="relative mb-32 md:mb-40 h-[70vh] w-full rounded-2xl overflow-hidden clip-reveal group">
+        <div className="relative mb-32 md:mb-40 h-[70vh] w-full rounded-3xl overflow-hidden clip-reveal group">
           <img 
             src="/frames/01_aerial_rooftop_pool/frame_0080.jpg" 
             alt="The Infinity Edge" 
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
           />
-          <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12 p-8 rounded-2xl glass-dark md:w-[400px]">
+          <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12 p-8 rounded-3xl glass-dark md:w-[400px]">
             <h3 className="font-display text-headline-md text-white mb-2">The Infinity Edge</h3>
             <p className="font-body text-body-md text-white/80">Experience seamless views where water meets the horizon.</p>
           </div>
@@ -55,7 +55,7 @@ const Amenities = () => {
               Wander through lush, curated botanical archways. A sanctuary of greenery that calms the mind and invigorates the senses, right outside your door.
             </p>
           </div>
-          <div className="md:col-span-7 h-[60vh] rounded-2xl overflow-hidden clip-reveal group">
+          <div className="md:col-span-7 h-[60vh] rounded-3xl overflow-hidden clip-reveal group">
             <img 
               src="/frames/07_green_floral_archway/frame_1005.jpg" 
               alt="Zenith Gardens" 
@@ -65,13 +65,13 @@ const Amenities = () => {
         </div>
 
         {/* 3. DINING TERRACE */}
-        <div className="relative mb-32 md:mb-40 h-[70vh] w-full rounded-2xl overflow-hidden clip-reveal group">
+        <div className="relative mb-32 md:mb-40 h-[70vh] w-full rounded-3xl overflow-hidden clip-reveal group">
           <img 
             src="/frames/04_outdoor_restaurant_terrace/frame_0640.jpg" 
             alt="Twilight Terrace" 
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
           />
-          <div className="absolute top-8 right-8 md:top-12 md:right-12 p-8 rounded-2xl glass-dark md:w-[400px]">
+          <div className="absolute top-8 right-8 md:top-12 md:right-12 p-8 rounded-3xl glass-dark md:w-[400px]">
             <h3 className="font-display text-headline-md text-white mb-2">Twilight Terrace</h3>
             <p className="font-body text-body-md text-white/80">Dine under the stars in an elegantly appointed outdoor sanctuary.</p>
           </div>
@@ -79,7 +79,7 @@ const Amenities = () => {
 
         {/* 4. ZEN GARDEN */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16 items-center mb-32 md:mb-40">
-          <div className="md:col-span-7 order-2 md:order-1 h-[60vh] rounded-2xl overflow-hidden clip-reveal group">
+          <div className="md:col-span-7 order-2 md:order-1 h-[60vh] rounded-3xl overflow-hidden clip-reveal group">
             <img 
               src="/frames/13_buddha_statue_zen_garden/frame_1205.jpg" 
               alt="Zen Sanctuary" 
@@ -96,7 +96,7 @@ const Amenities = () => {
 
         {/* 5. WELLNESS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="relative h-[50vh] rounded-2xl overflow-hidden clip-reveal group">
+          <div className="relative h-[50vh] rounded-3xl overflow-hidden clip-reveal group">
             <img 
               src="/frames/15_indoor_gym_fitness/frame_1227.jpg" 
               alt="Fitness Studio" 
@@ -106,7 +106,7 @@ const Amenities = () => {
               Fitness Studio
             </div>
           </div>
-          <div className="relative h-[50vh] rounded-2xl overflow-hidden clip-reveal group">
+          <div className="relative h-[50vh] rounded-3xl overflow-hidden clip-reveal group">
             <img 
               src="/frames/11_basketball_court/frame_1175.jpg" 
               alt="Sports Courts" 

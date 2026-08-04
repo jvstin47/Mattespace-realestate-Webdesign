@@ -38,7 +38,7 @@ const Residences = () => {
 
         {/* Layout */}
         <div className="relative">
-          <div className="w-full h-[75vh] rounded-2xl overflow-hidden clip-reveal relative">
+          <div className="w-full h-[75vh] rounded-3xl overflow-hidden clip-reveal relative">
             <img 
               src="/frames/03_exterior_building_facade/frame_0450.jpg" 
               alt="Exterior Building Facade" 
@@ -47,7 +47,7 @@ const Residences = () => {
           </div>
 
           <div className="relative -mt-24 md:-mt-32 z-10 md:ml-auto md:max-w-lg">
-            <div className="glass-card p-10 md:p-12 rounded-2xl text-reveal">
+            <div className="glass-card p-10 md:p-12 rounded-3xl text-reveal">
               <h3 className="font-display text-headline-md text-slate-800 mb-8">
                 Floor-to-ceiling glass invites the horizon inside.
               </h3>
@@ -82,14 +82,14 @@ const Residences = () => {
 
         {/* Secondary 2-column layout */}
         <div className="mt-24 grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="rounded-2xl overflow-hidden clip-reveal aspect-[3/4]">
+          <div className="rounded-3xl overflow-hidden clip-reveal aspect-[3/4]">
             <img 
               src="/frames/19_twin_towers_sunset/frame_1320.jpg" 
               alt="Twin Towers Sunset" 
               className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
             />
           </div>
-          <div className="rounded-2xl overflow-hidden clip-reveal aspect-[3/4] md:mt-16">
+          <div className="rounded-3xl overflow-hidden clip-reveal aspect-[3/4] md:mt-16">
             <img 
               src="/frames/05_building_facade_dusk_night/frame_0840.jpg" 
               alt="Building Facade Dusk" 

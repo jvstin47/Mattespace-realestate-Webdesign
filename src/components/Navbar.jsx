@@ -32,9 +32,13 @@ const Navbar = () => {
   return (
     <>
       <nav 
-        className={`fixed top-8 left-1/2 -translate-x-1/2 w-[92%] max-w-container z-50 glass rounded-full px-8 md:px-12 flex justify-between items-center transition-all duration-500 ease-out-expo ${scrolled ? 'bg-ceramic/80 backdrop-blur-[40px] py-3' : 'py-3.5'}`}
+        className={`fixed top-6 left-1/2 -translate-x-1/2 w-[92%] max-w-container z-50 rounded-full px-8 md:px-12 flex justify-between items-center transition-all duration-500 ease-out-expo ${
+          scrolled 
+            ? 'bg-ceramic/90 backdrop-blur-2xl border border-slate-300/50 shadow-md py-3 text-slate-800' 
+            : 'bg-slate-900/75 backdrop-blur-2xl border border-white/15 shadow-2xl py-3.5 text-white'
+        }`}
       >
-        <div className="font-display text-headline-sm text-slate-800 font-medium tracking-tight">
+        <div className={`font-display text-headline-sm font-medium tracking-tight transition-colors duration-500 ${scrolled ? 'text-slate-800' : 'text-white'}`}>
           Mattespace
         </div>
         
@@ -43,7 +47,9 @@ const Navbar = () => {
             <a 
               key={item} 
               href={`#${item.toLowerCase()}`}
-              className="group relative font-body text-label-md text-slate-500 hover:text-slate-800 transition-colors"
+              className={`group relative font-body text-label-md transition-colors duration-500 ${
+                scrolled ? 'text-slate-600 hover:text-slate-900' : 'text-white/75 hover:text-white'
+              }`}
             >
               {item}
               <span className="absolute left-0 bottom-[-4px] h-px w-0 bg-accent transition-all duration-300 group-hover:w-full"></span>
@@ -56,15 +62,19 @@ const Navbar = () => {
             ref={buttonRef}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            className="bg-accent text-white text-label-md px-6 py-2.5 rounded-full hover:bg-accent-hover transition-colors duration-300 transition-transform ease-out-expo"
-            style={{ transition: 'transform 0.1s ease-out, background-color 0.3s' }}
+            className={`text-label-md px-6 py-2.5 rounded-full transition-colors duration-300 ${
+              scrolled 
+                ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                : 'bg-white text-slate-900 hover:bg-slate-100 shadow-md'
+            }`}
+            style={{ transition: 'transform 0.1s ease-out, background-color 0.3s, color 0.3s' }}
           >
             Inquire
           </button>
         </div>
         
         <div className="md:hidden">
-          <button onClick={() => setMobileMenuOpen(true)} className="text-slate-800">
+          <button onClick={() => setMobileMenuOpen(true)} className={`transition-colors duration-500 ${scrolled ? 'text-slate-800' : 'text-white'}`}>
             <Menu className="w-6 h-6" />
           </button>
         </div>
