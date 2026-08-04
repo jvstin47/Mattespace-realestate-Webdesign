@@ -7,7 +7,7 @@ import { getCachedImage } from '../utils/framePreloader';
 // ── Config ──
 const FPS = 60;
 const FRAME_DURATION = 1000 / FPS;
-const PAUSE_DURATION = 350; // ms to pause between chapters
+const MANDATORY_STOP_DURATION = 1000; // Mandatory 1-second hold on every chapter
 
 const RAIL_POSITIONS = {
   'bottom-left': { bottom: 70, left: 64, top: 'auto', right: 'auto', transform: 'translate(0, 0)' },
@@ -24,139 +24,137 @@ export default function ScrollHero() {
   const lenisRef = useRef(null);
   const rafRef = useRef(null);
   
-    // Playback state
-    const stateRef = useRef({
-      currentChapter: 0,
-      currentFrame: 1,
-      isPlaying: false,
-      isCoolingDown: false,
-      direction: 1, // 1 for forward, -1 for reverse
-      isHeroLocked: true,
-    });
+  // Playback state
+  const stateRef = useRef({
+    currentChapter: 0,
+    currentFrame: 1,
+    isPlaying: false,
+    isCoolingDown: false,
+    direction: 1, // 1 for forward, -1 for reverse
+    isHeroLocked: true,
+  });
 
-    const [uiState, setUiState] = useState({
-      chapterIndex: 0,
-      showRail: true,
-      showFinalBrand: false,
-      showIndicator: true,
-    });
+  const [uiState, setUiState] = useState({
+    chapterIndex: 0,
+    showRail: true,
+    showFinalBrand: false,
+    showIndicator: true,
+  });
 
-    const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-    // Detect mobile
-    useEffect(() => {
-      const check = () => setIsMobile(window.innerWidth < 768);
-      check();
-      window.addEventListener('resize', check);
-      return () => window.removeEventListener('resize', check);
-    }, []);
+  // Detect mobile
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
-    // ── Canvas drawing ──
-    const drawFrame = useCallback((frameIndex) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      const img = getCachedImage(frameIndex);
-      if (!img || !img.complete || img.naturalWidth === 0) return;
+  // ── Canvas drawing ──
+  const drawFrame = useCallback((frameIndex) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const img = getCachedImage(frameIndex);
+    if (!img || !img.complete || img.naturalWidth === 0) return;
 
-      const dpr = window.devicePixelRatio || 1;
-      const cw = canvas.width / dpr;
-      const ch = canvas.height / dpr;
-      const scale = Math.max(cw / img.width, ch / img.height);
-      const x = (cw - img.width * scale) / 2;
-      const y = (ch - img.height * scale) / 2;
+    const dpr = window.devicePixelRatio || 1;
+    const cw = canvas.width / dpr;
+    const ch = canvas.height / dpr;
+    const scale = Math.max(cw / img.width, ch / img.height);
+    const x = (cw - img.width * scale) / 2;
+    const y = (ch - img.height * scale) / 2;
 
-      ctx.clearRect(0, 0, cw, ch);
-      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-    }, []);
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+  }, []);
 
-    // ── Playback Engine ──
-    const playChapter = useCallback((chapterIndex, direction) => {
-      const state = stateRef.current;
-      if (state.isPlaying || state.isCoolingDown) return;
+  // ── Playback Engine ──
+  const playChapter = useCallback((chapterIndex, direction) => {
+    const state = stateRef.current;
+    if (state.isPlaying || state.isCoolingDown) return;
 
-      const targetChapter = CHAPTERS[chapterIndex];
-      if (!targetChapter) return;
+    const targetChapter = CHAPTERS[chapterIndex];
+    if (!targetChapter) return;
 
-      state.isPlaying = true;
-      state.isCoolingDown = true;
-      state.currentChapter = chapterIndex;
-      state.direction = direction;
+    state.isPlaying = true;
+    state.isCoolingDown = true;
+    state.currentChapter = chapterIndex;
+    state.direction = direction;
 
-      setUiState(prev => ({
-        ...prev,
-        chapterIndex,
-        showRail: false, // hide rail during motion transition
-        showIndicator: false,
-      }));
+    setUiState(prev => ({
+      ...prev,
+      chapterIndex,
+      showRail: false, // hide rail during motion transition
+      showIndicator: false,
+    }));
 
-      let startTime = performance.now();
-      const targetFrame = direction === 1 ? targetChapter.endFrame : targetChapter.startFrame;
-      const initialFrame = direction === 1 ? targetChapter.startFrame : targetChapter.endFrame;
-      const totalSpan = Math.abs(targetChapter.endFrame - targetChapter.startFrame);
-      const speed = targetChapter.speedMultiplier || 1;
-      let textRevealed = false;
+    let startTime = performance.now();
+    const targetFrame = direction === 1 ? targetChapter.endFrame : targetChapter.startFrame;
+    const initialFrame = direction === 1 ? targetChapter.startFrame : targetChapter.endFrame;
+    const totalSpan = Math.abs(targetChapter.endFrame - targetChapter.startFrame);
+    const speed = targetChapter.speedMultiplier || 1;
+    let textRevealed = false;
 
-      const loop = (time) => {
-        const elapsed = time - startTime;
-        const rawAdvance = Math.floor((elapsed / FRAME_DURATION) * speed);
+    const loop = (time) => {
+      const elapsed = time - startTime;
+      const rawAdvance = Math.floor((elapsed / FRAME_DURATION) * speed);
 
-        if (rawAdvance > 0) {
-          state.currentFrame += Math.max(1, rawAdvance) * direction;
-          startTime = time;
+      if (rawAdvance > 0) {
+        state.currentFrame += Math.max(1, rawAdvance) * direction;
+        startTime = time;
+      }
+
+      // Reveal text card halfway through (>= 40% progress) while motion is active
+      const currentProgress = totalSpan > 0 ? Math.abs(state.currentFrame - initialFrame) / totalSpan : 1;
+      if (!textRevealed && currentProgress >= 0.4) {
+        textRevealed = true;
+        setUiState(prev => ({
+          ...prev,
+          showRail: chapterIndex !== CHAPTERS.length - 1,
+        }));
+      }
+
+      // Clamp frame boundary
+      let reachedEnd = false;
+      if (direction === 1 && state.currentFrame >= targetFrame) {
+        state.currentFrame = targetFrame;
+        reachedEnd = true;
+      } else if (direction === -1 && state.currentFrame <= targetFrame) {
+        state.currentFrame = targetFrame;
+        reachedEnd = true;
+      }
+
+      drawFrame(state.currentFrame);
+
+      if (reachedEnd) {
+        // Enforce mandatory 1.0 second stop before accepting any new scroll input
+        setUiState(prev => ({
+          ...prev,
+          showRail: chapterIndex !== CHAPTERS.length - 1,
+          showFinalBrand: chapterIndex === CHAPTERS.length - 1,
+          showIndicator: chapterIndex === 0,
+        }));
+
+        if (direction === 1 && chapterIndex === CHAPTERS.length - 1) {
+          state.isHeroLocked = false;
+          if (lenisRef.current) lenisRef.current.start();
         }
 
-        // Reveal text card halfway through (>= 40% progress) while motion is active
-        const currentProgress = totalSpan > 0 ? Math.abs(state.currentFrame - initialFrame) / totalSpan : 1;
-        if (!textRevealed && currentProgress >= 0.4) {
-          textRevealed = true;
-          setUiState(prev => ({
-            ...prev,
-            showRail: chapterIndex !== CHAPTERS.length - 1,
-          }));
-        }
+        // Strict 1000ms mandatory hold
+        setTimeout(() => {
+          state.isPlaying = false;
+          state.isCoolingDown = false;
+        }, MANDATORY_STOP_DURATION);
 
-        // Clamp frame boundary
-        let reachedEnd = false;
-        if (direction === 1 && state.currentFrame >= targetFrame) {
-          state.currentFrame = targetFrame;
-          reachedEnd = true;
-        } else if (direction === -1 && state.currentFrame <= targetFrame) {
-          state.currentFrame = targetFrame;
-          reachedEnd = true;
-        }
+      } else {
+        rafRef.current = requestAnimationFrame(loop);
+      }
+    };
 
-        drawFrame(state.currentFrame);
-
-        if (reachedEnd) {
-          // Scene completed: enforce strict cool-down so momentum scroll cannot skip chapters
-          setTimeout(() => {
-            state.isPlaying = false;
-            setUiState(prev => ({
-              ...prev,
-              showRail: chapterIndex !== CHAPTERS.length - 1,
-              showFinalBrand: chapterIndex === CHAPTERS.length - 1,
-              showIndicator: chapterIndex === 0,
-            }));
-
-            if (direction === 1 && chapterIndex === CHAPTERS.length - 1) {
-              state.isHeroLocked = false;
-              if (lenisRef.current) lenisRef.current.start();
-            }
-
-            // Require extra delay before next scroll gesture can register
-            setTimeout(() => {
-              state.isCoolingDown = false;
-            }, 550);
-
-          }, PAUSE_DURATION);
-        } else {
-          rafRef.current = requestAnimationFrame(loop);
-        }
-      };
-
-      rafRef.current = requestAnimationFrame(loop);
-    }, [drawFrame]);
+    rafRef.current = requestAnimationFrame(loop);
+  }, [drawFrame]);
 
     // ── Scroll Events ──
     const handleScroll = useCallback((e) => {
