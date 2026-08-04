@@ -1,17 +1,14 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SHOTS, TOTAL_FRAMES } from '../data/framesManifest';
-import { buildTimeline, resolveFrame, getCaptionOpacity } from '../utils/scrollEngine';
+import { CHAPTERS } from '../data/framesManifest';
 import { getCachedImage } from '../utils/framePreloader';
 
-gsap.registerPlugin(ScrollTrigger);
-
 // ── Config ──
-const VH_PER_WEIGHT = 23; // viewport-heights per weight unit
+const FPS = 60;
+const FRAME_DURATION = 1000 / FPS;
+const PAUSE_DURATION = 300; // ms to pause between chapters
 
-// Caption rail positions (inline styles for smooth GSAP-driven transitions)
 const RAIL_POSITIONS = {
   'bottom-left': { bottom: 80, left: 64, top: 'auto', right: 'auto', transform: 'translate(0, 0)' },
   'lower-right': { bottom: 80, right: 64, top: 'auto', left: 'auto', transform: 'translate(0, 0)' },
@@ -21,24 +18,29 @@ const RAIL_POSITIONS = {
   'center-bottom': { bottom: 80, left: '50%', top: 'auto', right: 'auto', transform: 'translate(-50%, 0)' },
 };
 
-// ── Component ──
-
 export default function ScrollHero() {
-  const sectionRef = useRef(null);
+  const containerRef = useRef(null);
   const canvasRef = useRef(null);
   const lenisRef = useRef(null);
-  const rafIdRef = useRef(null);
-
-  const [isMobile, setIsMobile] = useState(false);
-  const [state, setState] = useState({
-    shotIndex: 0,
-    localProgress: 0,
-    frameIndex: 1,
-    globalProgress: 0,
+  const rafRef = useRef(null);
+  
+  // Playback state
+  const stateRef = useRef({
+    currentChapter: 0,
+    currentFrame: 1,
+    isPlaying: false,
+    direction: 1, // 1 for forward, -1 for reverse
+    isHeroLocked: true,
   });
 
-  const timeline = useMemo(() => buildTimeline(SHOTS), []);
-  const totalHeight = Math.round(timeline.totalWeight * VH_PER_WEIGHT);
+  const [uiState, setUiState] = useState({
+    chapterIndex: 0,
+    showRail: true,
+    showFinalBrand: false,
+    showIndicator: true,
+  });
+
+  const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile
   useEffect(() => {
@@ -67,7 +69,142 @@ export default function ScrollHero() {
     ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
   }, []);
 
-  // ── Desktop: Lenis + GSAP ScrollTrigger ──
+  // ── Playback Engine ──
+  const playChapter = useCallback((chapterIndex, direction) => {
+    const state = stateRef.current;
+    if (state.isPlaying) return;
+
+    const targetChapter = CHAPTERS[chapterIndex];
+    if (!targetChapter) return;
+
+    state.isPlaying = true;
+    state.currentChapter = chapterIndex;
+    state.direction = direction;
+
+    setUiState(prev => ({
+      ...prev,
+      chapterIndex,
+      showRail: false, // hide rail while playing
+      showIndicator: false,
+    }));
+
+    let startTime = performance.now();
+    const targetFrame = direction === 1 ? targetChapter.endFrame : targetChapter.startFrame;
+
+    const loop = (time) => {
+      const elapsed = time - startTime;
+      const framesToAdvance = Math.floor(elapsed / FRAME_DURATION);
+
+      if (framesToAdvance > 0) {
+        state.currentFrame += framesToAdvance * direction;
+        startTime = time; // reset for next batch
+      }
+
+      // Clamp frame
+      let reachedEnd = false;
+      if (direction === 1 && state.currentFrame >= targetFrame) {
+        state.currentFrame = targetFrame;
+        reachedEnd = true;
+      } else if (direction === -1 && state.currentFrame <= targetFrame) {
+        state.currentFrame = targetFrame;
+        reachedEnd = true;
+      }
+
+      drawFrame(state.currentFrame);
+
+      if (reachedEnd) {
+        // Finished playing
+        setTimeout(() => {
+          state.isPlaying = false;
+          
+          setUiState(prev => ({
+            ...prev,
+            showRail: chapterIndex !== CHAPTERS.length - 1, // Hide rail on final chapter
+            showFinalBrand: chapterIndex === CHAPTERS.length - 1,
+            showIndicator: chapterIndex === 0,
+          }));
+
+          // If we finished the final chapter forward, unlock hero
+          if (direction === 1 && chapterIndex === CHAPTERS.length - 1) {
+            state.isHeroLocked = false;
+            if (lenisRef.current) lenisRef.current.start();
+          }
+
+        }, PAUSE_DURATION);
+      } else {
+        rafRef.current = requestAnimationFrame(loop);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(loop);
+  }, [drawFrame]);
+
+  // ── Scroll Events ──
+  const handleScroll = useCallback((e) => {
+    const state = stateRef.current;
+
+    // If hero is unlocked (we finished chapter 7), let normal scrolling happen
+    if (!state.isHeroLocked) {
+      // If we scroll back to the very top, re-lock the hero and play backwards
+      if (window.scrollY <= 0 && e.deltaY < 0) {
+        state.isHeroLocked = true;
+        if (lenisRef.current) lenisRef.current.stop();
+        playChapter(CHAPTERS.length - 1, -1);
+      }
+      return; 
+    }
+
+    // Hero is locked, prevent default scrolling
+    e.preventDefault();
+
+    if (state.isPlaying) return; // Ignore input while playing
+
+    // Detect intentional scroll threshold
+    if (Math.abs(e.deltaY) < 10) return;
+
+    if (e.deltaY > 0) {
+      // Scroll Down -> Next Chapter
+      if (state.currentChapter < CHAPTERS.length - 1) {
+        // If we are at the end of the current chapter, go to next
+        const nextIdx = state.direction === 1 ? state.currentChapter + 1 : state.currentChapter;
+        playChapter(nextIdx, 1);
+      } else if (state.currentChapter === CHAPTERS.length - 1 && state.direction === -1) {
+         playChapter(state.currentChapter, 1);
+      }
+    } else {
+      // Scroll Up -> Prev Chapter
+      if (state.currentChapter > 0) {
+         const prevIdx = state.direction === -1 ? state.currentChapter - 1 : state.currentChapter;
+         playChapter(prevIdx, -1);
+      } else if (state.currentChapter === 0 && state.direction === 1) {
+         playChapter(0, -1);
+      }
+    }
+  }, [playChapter]);
+
+  // Touch handling
+  const touchStartY = useRef(0);
+  const handleTouchStart = useCallback((e) => {
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+  
+  const handleTouchMove = useCallback((e) => {
+    const state = stateRef.current;
+    if (!state.isHeroLocked) return;
+
+    e.preventDefault();
+    if (state.isPlaying) return;
+
+    const touchY = e.touches[0].clientY;
+    const deltaY = touchStartY.current - touchY;
+    
+    if (Math.abs(deltaY) > 30) {
+      handleScroll({ deltaY, preventDefault: () => {} });
+      touchStartY.current = touchY; // reset
+    }
+  }, [handleScroll]);
+
+  // ── Init ──
   useEffect(() => {
     if (isMobile) return;
 
@@ -75,17 +212,17 @@ export default function ScrollHero() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
-    // Size canvas
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
       canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
       ctx.scale(dpr, dpr);
+      drawFrame(stateRef.current.currentFrame);
     };
     resize();
     window.addEventListener('resize', resize);
 
-    // Lenis — smoother, lighter scroll feel
+    // Initialize Lenis but keep it stopped until hero completes
     const lenis = new Lenis({
       lerp: 0.1,
       wheelMultiplier: 0.8,
@@ -93,95 +230,54 @@ export default function ScrollHero() {
       smoothWheel: true,
     });
     lenisRef.current = lenis;
+    lenis.stop(); // Lock page scroll
 
-    // Sync Lenis ↔ GSAP
-    lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
 
-    // ScrollTrigger
-    let prevFrame = -1;
-    const trigger = ScrollTrigger.create({
-      trigger: sectionRef.current,
-      start: 'top top',
-      end: 'bottom bottom',
-      scrub: 0.3,
-      onUpdate: (self) => {
-        const result = resolveFrame(self.progress, timeline);
-        setState(result);
+    // Attach native wheel event to window with { passive: false } to prevent default
+    window.addEventListener('wheel', handleScroll, { passive: false });
+    window.addEventListener('touchstart', handleTouchStart, { passive: false });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
 
-        if (result.frameIndex !== prevFrame) {
-          prevFrame = result.frameIndex;
-          if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
-          rafIdRef.current = requestAnimationFrame(() => drawFrame(result.frameIndex));
-        }
-      },
-    });
-
-    // Initial frame
+    // Draw initial frame
     drawFrame(1);
-    const initialResult = resolveFrame(0, timeline);
-    setState(initialResult);
 
     return () => {
       window.removeEventListener('resize', resize);
-      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
-      trigger.kill();
+      window.removeEventListener('wheel', handleScroll);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       lenis.destroy();
       lenisRef.current = null;
     };
-  }, [isMobile, timeline, drawFrame]);
+  }, [isMobile, drawFrame, handleScroll, handleTouchStart, handleTouchMove]);
 
-  // ── Derived caption state ──
-  const currentShot = SHOTS[state.shotIndex] || SHOTS[0];
-  const caption = currentShot.caption;
-  const isFinalShot = state.shotIndex === SHOTS.length - 1;
 
-  // Caption rail opacity — fades in/out per shot, disappears during holdEnd
-  const railOpacity = getCaptionOpacity(state.localProgress, currentShot.holdEnd || 0);
+  // ── UI Derived State ──
+  const currentChapterData = CHAPTERS[uiState.chapterIndex];
+  const caption = currentChapterData.caption;
 
-  // Final shot: editorial rail fades out at 60%, brand reveal fades in at 70%
-  const finalRailVisible = isFinalShot ? state.localProgress < 0.60 : true;
-  const finalRevealOpacity = isFinalShot
-    ? Math.max(0, Math.min(1, (state.localProgress - 0.70) / 0.15))
-    : 0;
-
-  // Panel theme
   const onDark = caption.panelMode === 'onDark';
   const panelBg = onDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
   const panelBorder = onDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
   const textPrimary = onDark ? 'rgba(255,255,255,0.92)' : 'rgba(28,39,51,0.92)';
   const textLabel = onDark ? 'rgba(255,255,255,0.45)' : 'rgba(28,39,51,0.45)';
   const textDesc = onDark ? 'rgba(255,255,255,0.55)' : 'rgba(28,39,51,0.55)';
-
-  // Position
+  
   const pos = RAIL_POSITIONS[caption.position] || RAIL_POSITIONS['bottom-left'];
 
-  // Scroll indicator
-  const showIndicator = state.globalProgress < 0.03;
-
-  // ── Mobile fallback ──
+  // Mobile fallback
   if (isMobile) {
     return (
       <section className="relative h-screen w-full overflow-hidden bg-slate-900">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover"
-          src="/Timeline 1.mp4"
-        />
+        <video autoPlay loop muted playsInline className="absolute inset-0 h-full w-full object-cover" src="/Timeline 1.mp4" />
         <div className="absolute inset-0 bg-black/25 pointer-events-none" />
         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
           <div className="glass-dark rounded-3xl p-8 max-w-sm w-full mx-auto flex flex-col items-center">
-            <h2 className="font-display text-headline-lg text-white mb-6">
-              Architecture Designed Around Light
-            </h2>
-            <a
-              href="#amenities"
-              className="inline-block border border-white/30 rounded-full px-6 py-3 text-label-md text-white hover:bg-white hover:text-slate-900 transition-colors duration-300"
-            >
+            <h2 className="font-display text-headline-lg text-white mb-6">Architecture Designed Around Light</h2>
+            <a href="#amenities" className="inline-block border border-white/30 rounded-full px-6 py-3 text-label-md text-white hover:bg-white hover:text-slate-900 transition-colors duration-300">
               Explore Amenities
             </a>
           </div>
@@ -190,136 +286,70 @@ export default function ScrollHero() {
     );
   }
 
-  // ── Desktop ──
+  // Desktop
   return (
-    <section ref={sectionRef} className="relative w-full" style={{ height: `${totalHeight}vh` }}>
-      <div className="sticky top-0 h-screen w-full overflow-hidden bg-black">
-        {/* Canvas */}
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+    <section ref={containerRef} className="relative w-full h-screen bg-black overflow-hidden">
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+      
+      <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/15 to-transparent pointer-events-none z-0" />
+      <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black/25 to-transparent pointer-events-none z-0" />
 
-        {/* Vignettes — subtle, never heavy */}
-        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/15 to-transparent pointer-events-none" />
-        <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-black/25 to-transparent pointer-events-none" />
-
-        {/* ── Caption Rail ── */}
-        {finalRailVisible && (
-          <div
-            className="absolute pointer-events-none z-10"
-            style={{
-              ...pos,
-              maxWidth: 480,
-              opacity: Math.min(railOpacity, finalRailVisible ? 1 : 0),
-              transition: 'top 0.9s cubic-bezier(0.16,1,0.3,1), bottom 0.9s cubic-bezier(0.16,1,0.3,1), left 0.9s cubic-bezier(0.16,1,0.3,1), right 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1), opacity 0.5s ease',
-            }}
-          >
-            <div
-              style={{
-                padding: '20px 28px',
-                backdropFilter: 'blur(36px)',
-                WebkitBackdropFilter: 'blur(36px)',
-                borderTop: `1px solid ${panelBorder}`,
-                borderBottom: `1px solid ${panelBorder}`,
-                background: panelBg,
-                transition: 'background 0.8s ease, border-color 0.8s ease',
-              }}
-            >
-              {/* Label */}
-              <div
-                className="font-body font-medium mb-3"
-                style={{
-                  fontSize: 11,
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase',
-                  color: textLabel,
-                  transition: 'color 0.8s ease',
-                }}
-              >
-                {caption.label}
-              </div>
-
-              {/* Headline — sans-serif, modern editorial */}
-              <div
-                className="font-body font-medium whitespace-pre-line"
-                style={{
-                  fontSize: 'clamp(24px, 2.2vw, 32px)',
-                  lineHeight: 1.15,
-                  color: textPrimary,
-                  transition: 'color 0.8s ease',
-                }}
-              >
-                {caption.headline}
-              </div>
-
-              {/* Description */}
-              {caption.description && (
-                <div
-                  className="font-body mt-3"
-                  style={{
-                    fontSize: 14,
-                    lineHeight: 1.5,
-                    color: textDesc,
-                    transition: 'color 0.8s ease',
-                  }}
-                >
-                  {caption.description}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ── Final Brand Reveal ── */}
-        {isFinalShot && finalRevealOpacity > 0 && (
-          <div
-            className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10"
-            style={{ opacity: finalRevealOpacity, transition: 'opacity 0.6s ease' }}
-          >
-            <h1
-              className="font-display text-white tracking-wider text-center"
-              style={{ fontSize: 'clamp(40px, 5vw, 72px)', fontWeight: 400 }}
-            >
-              MATTESPACE
-            </h1>
-            <p
-              className="font-body text-white/50 mt-4 text-center"
-              style={{ fontSize: 16, letterSpacing: '0.08em' }}
-            >
-              Live Above It All
-            </p>
-          </div>
-        )}
-
-        {/* ── Scroll Indicator ── */}
+      {/* ── Caption Rail ── */}
+      <div
+        className="absolute pointer-events-none z-10"
+        style={{
+          ...pos,
+          maxWidth: 480,
+          opacity: uiState.showRail ? 1 : 0,
+          transition: 'top 0.9s cubic-bezier(0.16,1,0.3,1), bottom 0.9s cubic-bezier(0.16,1,0.3,1), left 0.9s cubic-bezier(0.16,1,0.3,1), right 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1), opacity 0.5s ease',
+        }}
+      >
         <div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center z-10"
           style={{
-            opacity: showIndicator ? 1 : 0,
-            transition: 'opacity 0.7s ease',
-            pointerEvents: 'none',
+            padding: '20px 28px',
+            backdropFilter: 'blur(36px)',
+            WebkitBackdropFilter: 'blur(36px)',
+            borderTop: `1px solid ${panelBorder}`,
+            borderBottom: `1px solid ${panelBorder}`,
+            background: panelBg,
+            transition: 'background 0.8s ease, border-color 0.8s ease',
           }}
         >
-          <span
-            className="font-body text-white/50 uppercase mb-4"
-            style={{ fontSize: 10, letterSpacing: '0.16em' }}
-          >
-            Scroll
-          </span>
-          <div className="relative h-14 w-px bg-white/15 overflow-hidden">
-            <div
-              className="absolute left-0 w-full bg-white/70"
-              style={{
-                height: '40%',
-                animation: 'scrollIndicator 2.2s ease-in-out infinite',
-              }}
-            />
+          <div className="font-body font-medium mb-3" style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: textLabel, transition: 'color 0.8s ease' }}>
+            {caption.label}
           </div>
-          <style>{`
-            @keyframes scrollIndicator {
-              0%   { transform: translateY(-120%); opacity: 0; }
-              30%  { opacity: 1; }
-              100% { transform: translateY(250%); opacity: 0; }
-            }
-          `}</style>
+          <div className="font-body font-medium whitespace-pre-line" style={{ fontSize: 'clamp(24px, 2.2vw, 32px)', lineHeight: 1.15, color: textPrimary, transition: 'color 0.8s ease' }}>
+            {caption.headline}
+          </div>
+          {caption.description && (
+            <div className="font-body mt-3" style={{ fontSize: 14, lineHeight: 1.5, color: textDesc, transition: 'color 0.8s ease' }}>
+              {caption.description}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Final Brand Reveal ── */}
+      <div
+        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10"
+        style={{ opacity: uiState.showFinalBrand ? 1 : 0, transition: 'opacity 1s ease 0.2s' }}
+      >
+        <h1 className="font-display text-white tracking-wider text-center" style={{ fontSize: 'clamp(40px, 5vw, 72px)', fontWeight: 400 }}>
+          MATTESPACE
+        </h1>
+        <p className="font-body text-white/50 mt-4 text-center" style={{ fontSize: 16, letterSpacing: '0.08em' }}>
+          Live Above It All
+        </p>
+      </div>
+
+      {/* ── Scroll Indicator ── */}
+      <div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center z-10"
+        style={{ opacity: uiState.showIndicator ? 1 : 0, transition: 'opacity 0.7s ease', pointerEvents: 'none' }}
+      >
+        <span className="font-body text-white/50 uppercase mb-4" style={{ fontSize: 10, letterSpacing: '0.16em' }}>Scroll</span>
+        <div className="relative h-14 w-px bg-white/15 overflow-hidden">
+          <div className="absolute left-0 w-full bg-white/70" style={{ height: '40%', animation: 'scrollIndicator 2.2s ease-in-out infinite' }} />
         </div>
       </div>
     </section>
