@@ -96,23 +96,27 @@ export default function ScrollHero() {
       showIndicator: false,
     }));
 
-    let startTime = performance.now();
+    const playbackStartTime = performance.now();
+    const MIN_PLAYBACK_DURATION = 600; // Minimum time (ms) before a chapter can "end"
+
+    let lastFrameTime = performance.now();
     const targetFrame = direction === 1 ? targetChapter.endFrame : targetChapter.startFrame;
     const initialFrame = direction === 1 ? targetChapter.startFrame : targetChapter.endFrame;
     const totalSpan = Math.abs(targetChapter.endFrame - targetChapter.startFrame);
     const speed = targetChapter.speedMultiplier || 1;
+    const frameDuration = FRAME_DURATION / speed; // Time per frame adjusted for speed
     let textRevealed = false;
 
     const loop = (time) => {
-      const elapsed = time - startTime;
-      const rawAdvance = Math.floor((elapsed / FRAME_DURATION) * speed);
+      const elapsed = time - lastFrameTime;
 
-      if (rawAdvance > 0) {
-        state.currentFrame += Math.max(1, rawAdvance) * direction;
-        startTime = time;
+      // Advance exactly 1 frame per tick interval (no skipping)
+      if (elapsed >= frameDuration) {
+        state.currentFrame += direction;
+        lastFrameTime = time;
       }
 
-      // Reveal text card halfway through (>= 40% progress) while motion is active
+      // Reveal text card at >= 40% progress through the animation
       const currentProgress = totalSpan > 0 ? Math.abs(state.currentFrame - initialFrame) / totalSpan : 1;
       if (!textRevealed && currentProgress >= 0.4) {
         textRevealed = true;
@@ -134,8 +138,15 @@ export default function ScrollHero() {
 
       drawFrame(state.currentFrame);
 
+      // If frames are done but minimum duration hasn't elapsed, keep looping (hold on last frame)
+      const totalElapsed = time - playbackStartTime;
+      if (reachedEnd && totalElapsed < MIN_PLAYBACK_DURATION) {
+        rafRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
       if (reachedEnd) {
-        // Enforce mandatory 1.0 second stop before accepting any new scroll input
+        // Chapter complete — update UI and enforce mandatory 1.0 second stop
         setUiState(prev => ({
           ...prev,
           showRail: chapterIndex !== CHAPTERS.length - 1,
@@ -148,7 +159,7 @@ export default function ScrollHero() {
           if (lenisRef.current) lenisRef.current.start();
         }
 
-        // Strict 1000ms mandatory hold
+        // Strict 1000ms mandatory hold after playback completes
         setTimeout(() => {
           state.isPlaying = false;
           state.isCoolingDown = false;
