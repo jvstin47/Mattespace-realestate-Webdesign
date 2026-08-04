@@ -89,6 +89,13 @@ export default function ScrollHero() {
     state.currentChapter = chapterIndex;
     state.direction = direction;
 
+    // Jump currentFrame to the correct chapter boundary to prevent gap-frame flickers
+    if (direction === 1) {
+      state.currentFrame = targetChapter.startFrame;
+    } else {
+      state.currentFrame = targetChapter.endFrame;
+    }
+
     setUiState(prev => ({
       ...prev,
       chapterIndex,
@@ -195,19 +202,15 @@ export default function ScrollHero() {
 
       if (e.deltaY > 0) {
         // Scroll Down -> Next Chapter
-        if (state.currentChapter < CHAPTERS.length - 1) {
-          const nextIdx = state.direction === 1 ? state.currentChapter + 1 : state.currentChapter;
+        const nextIdx = state.currentChapter + 1;
+        if (nextIdx <= CHAPTERS.length - 1) {
           playChapter(nextIdx, 1);
-        } else if (state.currentChapter === CHAPTERS.length - 1 && state.direction === -1) {
-           playChapter(state.currentChapter, 1);
         }
       } else {
-        // Scroll Up -> Prev Chapter
-        if (state.currentChapter > 0) {
-           const prevIdx = state.direction === -1 ? state.currentChapter - 1 : state.currentChapter;
-           playChapter(prevIdx, -1);
-        } else if (state.currentChapter === 0 && state.direction === 1) {
-           playChapter(0, -1);
+        // Scroll Up -> Previous Chapter
+        const prevIdx = state.currentChapter - 1;
+        if (prevIdx >= 0) {
+          playChapter(prevIdx, -1);
         }
       }
     }, [playChapter]);
@@ -324,15 +327,18 @@ export default function ScrollHero() {
   // Mobile fallback
   if (isMobile) {
     return (
-      <section className="relative h-screen w-full overflow-hidden bg-slate-900">
+      <section className="relative h-screen w-full overflow-hidden bg-black">
         <video autoPlay loop muted playsInline className="absolute inset-0 h-full w-full object-cover" src="/Timeline 1.mp4" />
-        <div className="absolute inset-0 bg-black/25 pointer-events-none" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-          <div className="bg-slate-900/85 backdrop-blur-2xl border border-white/20 rounded-3xl p-8 max-w-sm w-full mx-auto flex flex-col items-center shadow-2xl">
-            <span className="text-label-xs text-accent uppercase tracking-widest mb-2 font-semibold">Residences</span>
-            <h2 className="font-display italic text-headline-lg text-white mb-6">Architecture Designed Around Light</h2>
-            <a href="#amenities" className="inline-block border border-white/30 rounded-full px-6 py-3 text-label-md text-white hover:bg-white hover:text-slate-900 transition-colors duration-300">
-              Explore Amenities
+        
+        {/* Gradient for text readability at the bottom */}
+        <div className="absolute inset-x-0 bottom-0 h-[45vh] bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none z-0" />
+        
+        <div className="absolute inset-x-0 bottom-0 flex flex-col items-start p-6 pb-12 z-10">
+          <div className="glass-dark border border-white/10 rounded-2xl p-5 w-full max-w-[90%] shadow-2xl">
+            <span className="text-label-xs text-accent uppercase tracking-widest mb-1.5 block font-semibold">Residences</span>
+            <h2 className="font-display italic text-headline-sm text-white mb-4 leading-snug">Architecture Designed Around Light</h2>
+            <a href="#amenities" className="inline-block border border-white/20 rounded-full px-5 py-2 text-[11px] uppercase tracking-widest text-white hover:bg-white hover:text-slate-900 transition-colors duration-300">
+              Explore
             </a>
           </div>
         </div>
