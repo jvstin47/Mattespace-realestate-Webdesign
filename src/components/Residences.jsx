@@ -40,7 +40,7 @@ const Residences = () => {
         <div className="relative">
           <div className="w-full h-[75vh] rounded-3xl overflow-hidden clip-reveal relative">
             <img 
-              src="/frames/03_exterior_building_facade/frame_0450.jpg" 
+              src="/frames/03_exterior_building_facade/frame_0450.webp" 
               alt="Exterior Building Facade" 
               className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
             />
@@ -84,14 +84,14 @@ const Residences = () => {
         <div className="mt-24 grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="rounded-3xl overflow-hidden clip-reveal aspect-[3/4]">
             <img 
-              src="/frames/19_twin_towers_sunset/frame_1320.jpg" 
+              src="/frames/19_twin_towers_sunset/frame_1320.webp" 
               alt="Twin Towers Sunset" 
               className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
             />
           </div>
           <div className="rounded-3xl overflow-hidden clip-reveal aspect-[3/4] md:mt-16">
             <img 
-              src="/frames/05_building_facade_dusk_night/frame_0840.jpg" 
+              src="/frames/05_building_facade_dusk_night/frame_0840.webp" 
               alt="Building Facade Dusk" 
               className="w-full h-full object-cover transition-transform duration-1000 hover:scale-105"
             />

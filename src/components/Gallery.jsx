@@ -3,47 +3,47 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const galleryImages = [
   {
-    src: "/frames/19_twin_towers_sunset/frame_1320.jpg",
+    src: "/frames/19_twin_towers_sunset/frame_1320.webp",
     title: "Sunset Silhouette",
     category: "Exterior · Golden Hour"
   },
   {
-    src: "/frames/01_aerial_rooftop_pool/frame_0080.jpg",
+    src: "/frames/01_aerial_rooftop_pool/frame_0080.webp",
     title: "Infinity Edge",
     category: "Amenities · Afternoon"
   },
   {
-    src: "/frames/02_blue_luxury_car/frame_0260.jpg",
+    src: "/frames/02_blue_luxury_car/frame_0260.webp",
     title: "Grand Arrival",
     category: "Porte-Cochère · Morning"
   },
   {
-    src: "/frames/05_building_facade_dusk_night/frame_0840.jpg",
+    src: "/frames/05_building_facade_dusk_night/frame_0840.webp",
     title: "Nightfall",
     category: "Architecture · Dusk"
   },
   {
-    src: "/frames/04_outdoor_restaurant_terrace/frame_0640.jpg",
+    src: "/frames/04_outdoor_restaurant_terrace/frame_0640.webp",
     title: "Twilight Dining",
     category: "Lifestyle · Evening"
   },
   {
-    src: "/frames/08_aerial_garden_plaza_fountains/frame_1050.jpg",
+    src: "/frames/08_aerial_garden_plaza_fountains/frame_1050.webp",
     title: "Reflecting Pools",
     category: "Landscape · Midday"
   },
   {
-    src: "/frames/09_aerial_amphitheater_garden/frame_1100.jpg",
+    src: "/frames/09_aerial_amphitheater_garden/frame_1100.webp",
     title: "Amphitheater",
     category: "Landscape · Afternoon"
   },
   {
-    src: "/frames/13_buddha_statue_zen_garden/frame_1205.jpg",
+    src: "/frames/13_buddha_statue_zen_garden/frame_1205.webp",
     title: "Zen Garden",
     category: "Wellness · Morning"
   },
   {
-    src: "/frames/21_final_hero_shot_twin_towers/frame_1520.jpg",
+    src: "/frames/21_final_hero_shot_twin_towers/frame_1520.webp",
     title: "Twin Towers",
     category: "Hero · Sunset"
   }

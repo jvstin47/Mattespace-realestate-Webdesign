@@ -60,7 +60,7 @@ const Contact = () => {
     <section id="contact" className="relative min-h-screen flex items-center justify-center bg-ceramic-200 overflow-hidden">
       {/* Background Image */}
       <img
-        src="/frames/03_exterior_building_facade/frame_0450.jpg"
+        src="/frames/03_exterior_building_facade/frame_0450.webp"
         alt="Building Facade"
         className="absolute inset-0 w-full h-full object-cover grayscale opacity-[0.06] pointer-events-none"
       />

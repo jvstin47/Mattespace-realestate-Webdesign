@@ -264,6 +264,6 @@ export const CHAPTERS = [
 export function getFramePath(frameNumber) {
   const padded = String(frameNumber).padStart(4, '0');
   const folderData = FOLDERS.find((f) => frameNumber >= f.startFrame && frameNumber <= f.endFrame);
-  if (!folderData) return `/frames/${FOLDERS[0].folder}/frame_0001.jpg`;
-  return `/frames/${folderData.folder}/frame_${padded}.jpg`;
+  if (!folderData) return `/frames/${FOLDERS[0].folder}/frame_0001.webp`;
+  return `/frames/${folderData.folder}/frame_${padded}.webp`;
 }
