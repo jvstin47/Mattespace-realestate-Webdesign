@@ -7,7 +7,7 @@ import { getCachedImage } from '../utils/framePreloader';
 // ── Config ──
 const FPS = 60;
 const FRAME_DURATION = 1000 / FPS;
-const MANDATORY_STOP_DURATION = 1000; // Mandatory 1-second hold on every chapter
+const MANDATORY_STOP_DURATION = 450; // Brief hold on every chapter (was 1000ms — felt sluggish)
 
 const RAIL_POSITIONS = {
   'bottom-left': { bottom: 70, left: 64, top: 'auto', right: 'auto', transform: 'translate(0, 0)' },
@@ -38,6 +38,7 @@ export default function ScrollHero() {
     isCoolingDown: false,
     direction: 1, // 1 for forward, -1 for reverse
     isHeroLocked: true,
+    pendingDirection: null, // latest scroll intent received while busy — consumed once the hold ends
   });
 
   const [uiState, setUiState] = useState({
@@ -104,7 +105,7 @@ export default function ScrollHero() {
     }));
 
     const playbackStartTime = performance.now();
-    const MIN_PLAYBACK_DURATION = 600; // Minimum time (ms) before a chapter can "end"
+    const MIN_PLAYBACK_DURATION = 400; // Minimum time (ms) before a chapter can "end"
 
     let lastFrameTime = performance.now();
     const targetFrame = direction === 1 ? targetChapter.endFrame : targetChapter.startFrame;
@@ -166,10 +167,23 @@ export default function ScrollHero() {
           if (lenisRef.current) lenisRef.current.start();
         }
 
-        // Strict 1000ms mandatory hold after playback completes
+        // Brief mandatory hold after playback completes
         setTimeout(() => {
           state.isPlaying = false;
           state.isCoolingDown = false;
+
+          // If the user kept scrolling during the hold, honor that intent now
+          // instead of requiring them to scroll again. Only the latest direction
+          // is remembered, so a long fling still advances one chapter at a time.
+          const pending = state.pendingDirection;
+          state.pendingDirection = null;
+          if (pending === 1) {
+            const nextIdx = state.currentChapter + 1;
+            if (nextIdx <= CHAPTERS.length - 1) playChapter(nextIdx, 1);
+          } else if (pending === -1) {
+            const prevIdx = state.currentChapter - 1;
+            if (prevIdx >= 0) playChapter(prevIdx, -1);
+          }
         }, MANDATORY_STOP_DURATION);
 
       } else {
@@ -194,11 +208,16 @@ export default function ScrollHero() {
         return; 
       }
 
-      // Hero locked: prevent page scroll & block if currently playing or cooling down
+      // Hero locked: prevent page scroll
       e.preventDefault();
-      if (state.isPlaying || state.isCoolingDown) return;
-
       if (Math.abs(e.deltaY) < 15) return;
+
+      // If busy (mid-transition or in the mandatory hold), remember the intent
+      // instead of dropping it — it fires automatically once the hold ends.
+      if (state.isPlaying || state.isCoolingDown) {
+        state.pendingDirection = e.deltaY > 0 ? 1 : -1;
+        return;
+      }
 
       if (e.deltaY > 0) {
         // Scroll Down -> Next Chapter
@@ -248,6 +267,7 @@ export default function ScrollHero() {
     state.isCoolingDown = false;
     state.direction = 1;
     state.isHeroLocked = true;
+    state.pendingDirection = null;
 
     if (lenisRef.current) lenisRef.current.stop();
 
