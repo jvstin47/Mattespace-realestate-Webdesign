@@ -1,50 +1,72 @@
-import React, { useEffect, useState } from 'react';
-import { preloadFrames } from './utils/framePreloader';
-import CustomCursor from './components/CustomCursor';
-import Preloader from './components/Preloader';
-import Navbar from './components/Navbar';
-import ScrollHero from './components/ScrollHero';
-import Amenities from './components/Amenities';
-import Residences from './components/Residences';
-import Gallery from './components/Gallery';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
+/**
+ * Application Root Component
+ *
+ * Configures top-level architectural providers:
+ * - ErrorBoundary for resilient runtime recovery
+ * - ExperienceProvider for interactive story state and scroll synchronization
+ * - ToastProvider for notification management
+ */
 
-function App() {
-  const [loadProgress, setLoadProgress] = useState(0);
-  const [isReady, setIsReady] = useState(false);
-  const [hasEntered, setHasEntered] = useState(false);
+import React, { useEffect } from 'react';
+import { preloadFrames } from './utils/framePreloader';
+import { ExperienceProvider, useExperience } from './context/ExperienceContext';
+import { ToastProvider } from './context/ToastContext';
+import {
+  ErrorBoundary,
+  ToastContainer,
+  Navbar,
+  Footer,
+  ScrollHero,
+  Amenities,
+  Residences,
+  Gallery,
+  Contact,
+  CustomCursor,
+  Preloader,
+} from './components';
+
+function MainExperience() {
+  const {
+    loadProgress,
+    setLoadProgress,
+    isReady,
+    setIsReady,
+    hasEntered,
+    enterExperience,
+  } = useExperience();
 
   useEffect(() => {
     preloadFrames({
       onProgress: setLoadProgress,
       onReady: () => setIsReady(true),
-      onComplete: () => setLoadProgress(100)
+      onComplete: () => setLoadProgress(100),
     });
-  }, []);
-
-  const handleEnter = () => {
-    setHasEntered(true);
-  };
+  }, [setLoadProgress, setIsReady]);
 
   return (
     <>
       <CustomCursor />
-      
+
+      {/* Narrative Gateway Preloader */}
       {!hasEntered && (
-        <Preloader 
-          progress={loadProgress} 
-          isReady={isReady} 
-          onEnter={handleEnter} 
+        <Preloader
+          progress={loadProgress}
+          isReady={isReady}
+          onEnter={enterExperience}
         />
       )}
-      
-      <div 
-        className={`w-full overflow-x-hidden transition-opacity duration-1000 ${hasEntered ? 'opacity-100' : 'opacity-0'}`}
+
+      {/* Main Experience Layout */}
+      <div
+        className={`w-full overflow-x-hidden transition-opacity duration-1000 ${
+          hasEntered ? 'opacity-100' : 'opacity-0'
+        }`}
       >
         <Navbar />
         <main>
-          <ScrollHero />
+          <ErrorBoundary>
+            <ScrollHero />
+          </ErrorBoundary>
           <Amenities />
           <Residences />
           <Gallery />
@@ -53,9 +75,23 @@ function App() {
         <Footer />
       </div>
 
+      {/* Atmospheric Film Grain Texture */}
       <div className="grain pointer-events-none fixed inset-0 z-[9997]" />
+
+      {/* User Notification Stack */}
+      <ToastContainer />
     </>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <ExperienceProvider>
+        <ToastProvider>
+          <MainExperience />
+        </ToastProvider>
+      </ExperienceProvider>
+    </ErrorBoundary>
+  );
+}

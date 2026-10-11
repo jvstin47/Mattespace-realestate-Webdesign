@@ -1,13 +1,23 @@
+/**
+ * Custom Cursor Component
+ *
+ * Renders an inertia-driven custom cursor dot for fine pointer devices,
+ * morphing into an enlarged frosted lens when hovering interactive triggers or imagery.
+ */
+
 import React, { useEffect, useRef } from 'react';
 
 export default function CustomCursor() {
   const cursorRef = useRef(null);
   const requestRef = useRef();
-  const mouse = useRef({ x: 0, y: 0 });
-  const pos = useRef({ x: 0, y: 0 });
+  const mouse = useRef({ x: -100, y: -100 });
+  const pos = useRef({ x: -100, y: -100 });
 
   useEffect(() => {
-    if (!window.matchMedia('(pointer: fine)').matches) return;
+    // Disable completely on touch devices / coarse pointers
+    if (typeof window === 'undefined' || !window.matchMedia('(pointer: fine)').matches) {
+      return;
+    }
 
     const cursor = cursorRef.current;
     if (!cursor) return;
@@ -22,13 +32,12 @@ export default function CustomCursor() {
       pos.current.y += (mouse.current.y - pos.current.y) * 0.15;
 
       cursor.style.transform = `translate3d(${pos.current.x}px, ${pos.current.y}px, 0)`;
-
       requestRef.current = requestAnimationFrame(updateCursor);
     };
 
     const handleMouseOver = (e) => {
       const target = e.target;
-      const isHoverable = target.closest('a, button, [data-cursor="hover"]');
+      const isHoverable = target.closest('a, button, [role="button"], [data-cursor="hover"]');
       const isImage = target.closest('img, [data-cursor="image"]');
 
       if (isImage) {
@@ -47,14 +56,14 @@ export default function CustomCursor() {
     window.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseover', handleMouseOver);
     document.addEventListener('mouseout', handleMouseOut);
-    
+
     requestRef.current = requestAnimationFrame(updateCursor);
 
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseover', handleMouseOver);
       document.removeEventListener('mouseout', handleMouseOut);
-      cancelAnimationFrame(requestRef.current);
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
   }, []);
 
